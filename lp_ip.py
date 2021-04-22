@@ -1,5 +1,6 @@
 # LP solver using barrier method (interior point)
 import numpy as np
+from scipy.optimize import minimize
 
 def newton_opt_single(A, b, c, y, t):
     # compute delta_y
@@ -8,13 +9,28 @@ def newton_opt_single(A, b, c, y, t):
     n_JF_y = A @ np.diag(d ** 2) @ A.T # negative Jacobian
     return np.linalg.solve(n_JF_y, Fy)
 
+def Hessian(A, b, c, y, t):
+    d = 1 / (A.T @ y - c)
+    return A @ np.diag(d ** 2) @ A.T # negative Jacobian
+
+def Jacobian(A, b, c, y, t):
+    d = 1 / (A.T @ y - c)
+    return -(t * b + A @ d)
+
+def Object_Function(A, b, c, y, t):
+    if np.any(c - A.T @ y <= 0):
+        return np.infty
+    val = t * np.dot(b, y) + np.sum(np.log(c - A.T @ y))
+    return -1.0 * val
+
 def newton_opt(A, b, c, y, t, eps):
-    delta_y = 1
-    y_clone = y.copy()
-    while np.linalg.norm(delta_y) >= eps:
-        delta_y = newton_opt_single(A, b, c, y_clone, t)
-        y_clone += delta_y
-    return y_clone
+    _object_function = lambda x: Object_Function(A, b, c, x, t)
+    _jacobian = lambda x: Jacobian(A, b, c, x, t)
+    _hessian = lambda x: Hessian(A, b, c, x, t)
+
+    res = minimize(_object_function, y, method='Newton-CG', jac=_jacobian,
+        hess=_hessian, options={'xtol': eps})
+    return res.x
 
 def lp_ip(A, b, c, y0=None, eps=1e-4, mu=2):
     '''
