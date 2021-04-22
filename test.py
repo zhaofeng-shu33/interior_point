@@ -9,7 +9,6 @@ class LP_IP(unittest.TestCase):
         c = np.array([1, 1, 0, 0], dtype=float)
         y0 = np.array([0.1, 0.1]) # exact interior point
         argmax_y, max_y = lp_ip(A, b, c, y0=y0)
-        print(argmax_y, max_y)
         self.assertTrue(np.linalg.norm(argmax_y) < 1e-3)
         self.assertTrue(np.abs(max_y) < 1e-3)
     def test_vineyard(self):
@@ -18,7 +17,6 @@ class LP_IP(unittest.TestCase):
         c = np.array([4, 8, 6, 0, 0, 0], dtype=float)
         y0 = np.array([0.5, 0.5, 0.5]) # exact interior point
         argmax_y, max_y = lp_ip(A, b, c, y0=y0)
-        print(argmax_y, max_y)
 
 if __name__ == '__main__':
     unittest.main()
