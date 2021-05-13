@@ -88,7 +88,18 @@ def lp_ip_pd(A, b, c, eps=1e-2, mu=0.5):
         np.fill_diagonal(F_diff[(m + n):,(m + n):], x)
         packed_sol = np.linalg.solve(F_diff, -F)
         # always update by unit length
+        delta_x = packed_sol[:n]
+        delta_s = packed_sol[(m + n):]
+        v = 1
+        for i in range(n):
+            if delta_x[i] < 0 and x[i] / (-delta_x[i]) < v:
+                v = x[i] / (-delta_x[i])
+            if delta_s[i] < 0 and s[i] / (-delta_s[i]) < v:
+                v = s[i] / (-delta_s[i])
+        v *= 0.99
+        packed_sol *= v
         x += packed_sol[:n]
         y += packed_sol[n:(m + n)]
         s += packed_sol[(m + n):]
+        print(x, y, s)
     return (y, np.dot(b, y))

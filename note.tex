@@ -1,0 +1,120 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{amssymb}
+\DeclareMathOperator{\R}{\mathbb{R}}
+\DeclareMathOperator{\diag}{diag}
+\title{lp interior point}
+\author{zhaof17 }
+\date{April 2021}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+We use barrier method to solve LP in standard form:
+\begin{align}\label{eq:dual}
+    \max \,& b^T y \\
+    s.t. \,& A^T y \leq c 
+\end{align}
+where $b,y \in \R^{m}, c\in \R^{n} $ and $A$
+is an $m\times n$ matrix.
+
+Writing $A=[a_1, \dots, a_n]$ and Consider the equivalent problem:
+\begin{equation}\label{eq:tby}
+    \max t b^T y + \sum_{s=1}^{n}\log (c_s- a_s^T y)
+\end{equation}
+for $t>0$.
+For given $y$ and $t$, using Newton's method to solve
+\eqref{eq:tby}, $\Delta y$ is given by:
+\begin{equation}\label{eq:leq}
+    \sum_{s=1}^n \frac{a_sa_s^T}{(a_s^T y - c_s)^2} \cdot \Delta y = F(y)
+\end{equation}
+where $F(y):= tb+\sum_{s=1}^n \frac{a_s}{a_s^T y - c_s}$
+is a function from $\R^{m}$ to $\R^{m}$.
+The coefficients of the linear equation system in \eqref{eq:leq} can be written in concise form as: $F(y) = tb + A d$ where $d = \frac{1}{A^T y - c} \in \R^{n}$.
+Further, the negative Jacobian is:
+\begin{equation}
+    -J_F(y) = A \diag(d^2) A^T
+\end{equation}
+\section{Primal dual formulation}
+Consider the canonical form of LP:
+\begin{align}
+    \min \,& c^T x \\
+    s.t. \,& A^T x = b, x\geq 0 
+\end{align}
+Its duality is given by
+\eqref{eq:dual}.
+If we solve
+\begin{align}
+    \min \,& c^T x - \sigma \sum_{i=1}^n\log(x_i) \\
+    s.t. \,& A^T x = b
+\end{align}
+for $\sigma>0$.
+The optimal condition is given by
+$c= A^T y +  \sigma (\frac{1}{x_1}, \dots, \frac{1}{x_n})^T$ and $Ax=b$.
+Let $s_i = \frac{\sigma}{ x_i}$. Then we have
+$A^T y + s = c$ and $SX=\sigma$.
+where $S=\diag(s_1, \dots, s_n), X=\diag(x_1,\dots, x_n)$. The joint equation
+is $F_t(x,y,s)=0$ where
+\begin{align}\label{eq:F}
+    F(x,y,s)=\begin{pmatrix}
+    A^Ty + s - c \\
+    Ax - b \\
+    XSe - \sigma
+    \end{pmatrix}
+\end{align}
+Using Newton's method to solve
+\eqref{eq:F} gives the following update scheme:
+\begin{equation}\label{eq:update_F}
+    \begin{pmatrix}
+    0 & A^T & I_n \\
+    A & 0 & 0\\
+    S & 0 & X
+    \end{pmatrix}
+    \begin{pmatrix}
+    \Delta x\\ \Delta y \\ \Delta s
+    \end{pmatrix}
+    = F(x,y,s)
+\end{equation}
+We reformulate \eqref{eq:dual} as 
+\begin{align}\label{eq:dual2}
+    \max \,& b^T y \\
+    s.t. \,& A^T y + s = c , s\geq 0
+\end{align}
+Suppose the solution triple to $F_t(x,y,s)=0$ 
+is given by $(x_t^*, y_t^*, s_t^*)$.
+Then $(y_t^*,s_t^*)$ is feasible to \eqref{eq:dual2}. The dual value at
+$(y_t^*,s_t^*)$ is given by
+$b^T y_t^* = b^T y_t^* - (A^T y_t^* + s_t^* - c)^Tx_t^* = c^T x_t^* - \sum_{i=1}^n (x^*_t)_i(s^*_t)_i = c^T x_t^* -\frac{n}{t}$.
+That is, the dual gap is $\frac{n}{t}$,
+and $\sigma$ represents the average dual gap.
+Below we write the primal dual interior point
+method for LP.
+\begin{enumerate}
+    \item Starting from $x^{(0)}>0, s^{(0)}>0, y^{(0)}$
+    for given decaying coefficient $\mu$.
+    (arbitrary). Let $t=0$.
+    \item Determine the new average dual gap
+    $\sigma = \mu\frac{1}{n}\sum_{i=1}^n x^{(t)}_i s^{(t)}_i$
+    \item If $\sigma$ and $F(x,y,s)$ are small
+    enough, terminate;
+    \item Solve \eqref{eq:update_F} to get the update direction
+    $\Delta x, \Delta y, \Delta s$.
+    \item Update the new value
+    $x^{(t+1)} = x^{(t)} + v\Delta x $
+    $y^{(t+1)} = y^{(t)} + v\Delta y $
+    $s^{(t+1)} = s^{(t)} + v\Delta s $
+    where $v$ is chosen such that
+    $x^{(t+1)}>0,s^{(t+1)}>0$ are guaranteed.
+    \item Let $t\leftarrow t+1$. Return to step 2.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{ch10} Interior-Point Methods for Linear Programming,
+\url{https://people.inf.ethz.ch/fukudak/lect/opt2011/aopt11note4.pdf}
+\bibitem{stephen} Convex optimization, Stephen Boyd
+\end{thebibliography}
+\end{document}
