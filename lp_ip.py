@@ -77,15 +77,15 @@ def lp_ip_pd(A, b, c, eps=1e-2, mu=0.5):
     err = 1
     while err > eps:
         sigma = mu * np.dot(x, s) / n
-        F_1 = A @ y + s - c
+        F_1 = A.T @ y + s - c
         F_2 = A @ x - b
         F_3 = x * s - sigma
-        F = np.array([F_1, F_2, F_3])
+        F = np.concatenate((F_1, F_2, F_3))
         err = sigma + np.linalg.norm(F)
         if err < eps:
             break
         np.fill_diagonal(F_diff[(m + n):,:n], s)
-        np.fill_diagonal(F_diff[(m + n):,(m + n)], x)
+        np.fill_diagonal(F_diff[(m + n):,(m + n):], x)
         packed_sol = np.linalg.solve(F_diff, -F)
         # always update by unit length
         x += packed_sol[:n]
