@@ -57,7 +57,7 @@ def lp_ip(A, b, c, y0=None, eps=1e-4, mu=2):
             t *= mu
     return (y, np.dot(b, y))
 
-def lp_ip_pd(A, b, c, eps=1e-2, mu=0.5):
+def lp_ip_pd(A, b, c, eps=1e-3, mu=0.5, max_iter=40):
     '''
     primal dual method
 
@@ -73,9 +73,11 @@ def lp_ip_pd(A, b, c, eps=1e-2, mu=0.5):
     F_diff = np.zeros([2 * n + m, 2 * n + m])
     F_diff[:n, n:(m + n)] = A.T
     F_diff[n:(m + n), :n] = A
-    F_diff[:n, (m + n): (2 * n + m)] = - np.eye(n)
+    F_diff[:n, (m + n): (2 * n + m)] = np.eye(n)
     err = 1
-    while err > eps:
+    iter_cnt = 0
+    while err > eps and iter_cnt < max_iter:
+        iter_cnt += 1
         sigma = mu * np.dot(x, s) / n
         F_1 = A.T @ y + s - c
         F_2 = A @ x - b
@@ -101,5 +103,4 @@ def lp_ip_pd(A, b, c, eps=1e-2, mu=0.5):
         x += packed_sol[:n]
         y += packed_sol[n:(m + n)]
         s += packed_sol[(m + n):]
-        print(x, y, s)
     return (y, np.dot(b, y))
