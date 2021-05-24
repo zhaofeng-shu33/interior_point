@@ -2,6 +2,7 @@ import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix
 from scipy.sparse import identity
 from scipy.sparse import hstack, vstack
+import scipy.linalg
 
 def construct_sparse_A(n):
     row = np.array(list(range(0, n)))
@@ -33,7 +34,9 @@ def construct_diff_F(S, X):
 def get_maximal_step_length(X, delta_X):
     vals, Q = np.linalg.eigh(X)
     L_inv = np.diag(1 / np.sqrt(vals)) @ Q.T
-    lambda_max = 
+    target_matrix = -1 * L_inv @ delta_X @ L_inv.T
+    n = Q.shape[0]
+    lambda_max = scipy.linalg.eigh(target_matrix, eigvals_only=True, eigvals=[n-1, n-1])[0]
     return 1 / lambda_max
 
 def lp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
@@ -84,7 +87,7 @@ def lp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
         delta_S = packed_sol[(m + n_square):].reshape(n, n)
         alpha = get_maximal_step_length(X, delta_X)
         beta = get_maximal_step_length(S, delta_S)
-        v = np.min([1, alpha, beta])
+        v = np.min([1, tau * alpha, tau * beta])
         X += v * delta_X
         y += v * packed_sol[n_square:(m + n_square)]
         S += v * delta_S
