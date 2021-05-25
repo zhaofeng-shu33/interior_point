@@ -50,11 +50,17 @@ class SDP_IP_PD(unittest.TestCase):
         alpha_computed = get_maximal_step_length(a, b)
         self.assertAlmostEqual(alpha_computed, alpha_target)
     def test_sample_data(self):
-        C = np.array([[-1.,  1., -1., -1.],
+        C = -1 * np.array([[-1.,  1., -1., -1.],
                       [ 1., -1., -1.,  1.],
                       [-1., -1., -1.,  1.],
                       [-1.,  1.,  1., -1.]])
-        sdp_ip_pd(C)
-    
+        X_true = np.array([[1.,  1., -1., -1.],
+                      [ 1., 1., -1.,  -1.],
+                      [-1., -1., 1.,  1.],
+                      [-1.,  -1.,  1., 1.]])                      
+        X, val = sdp_ip_pd(C, eps=1e-5)
+        self.assertTrue(abs(val + 4) < 1e-2)
+        self.assertTrue(np.linalg.norm(X_true - X) < 1e-2)
+
 if __name__ == '__main__':
     unittest.main()

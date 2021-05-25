@@ -37,6 +37,8 @@ def get_maximal_step_length(X, delta_X):
     target_matrix = -1 * L_inv @ delta_X @ L_inv.T
     n = Q.shape[0]
     lambda_max = scipy.linalg.eigh(target_matrix, eigvals_only=True, eigvals=[n-1, n-1])[0]
+    if lambda_max < 0:
+        return 1 # in case delta_X is positive definite, return 1
     return 1 / lambda_max
 
 def sdp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
@@ -91,6 +93,7 @@ def sdp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
         X += v * delta_X
         y += v * packed_sol[n_square:(m + n_square)]
         S += v * delta_S
+
     return (X, np.dot(b, y)) #(optimal_point, optimal_value)
 
 if __name__ == '__main__':
