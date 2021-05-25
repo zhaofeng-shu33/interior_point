@@ -95,10 +95,3 @@ def sdp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
         S += v * delta_S
 
     return (X, np.dot(b, y)) #(optimal_point, optimal_value)
-
-if __name__ == '__main__':
-    n = 4
-    S = np.eye(4)
-    X = np.eye(4)
-    diff_F = construct_diff_F(S, X)
-    print(type(diff_F))
