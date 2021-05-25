@@ -11,7 +11,7 @@ def construct_sparse_A(n):
     return coo_matrix((data, (row, col)), shape=(n, n * n))
 
 def construct_dense_A(n):
-    A = np.array([n, n ** 2])
+    A = np.zeros([n, n ** 2])
     for i in range(0, n):
         A[i, i * n + i] = 1
     return A
@@ -39,7 +39,7 @@ def get_maximal_step_length(X, delta_X):
     lambda_max = scipy.linalg.eigh(target_matrix, eigvals_only=True, eigvals=[n-1, n-1])[0]
     return 1 / lambda_max
 
-def lp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
+def sdp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
     '''
     primal dual method for solving min C * X, s.t. X_{ii} = 1, for i=1,2,\dots, n
 
@@ -91,7 +91,7 @@ def lp_ip_pd(C, eps=1e-3, mu=0.5, max_iter=40):
         X += v * delta_X
         y += v * packed_sol[n_square:(m + n_square)]
         S += v * delta_S
-    return (y, np.dot(b, y))
+    return (X, np.dot(b, y)) #(optimal_point, optimal_value)
 
 if __name__ == '__main__':
     n = 4

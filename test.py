@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 from lp_ip import lp_ip, lp_ip_pd
-from sdp_ip import get_maximal_step_length
+from sdp_ip import get_maximal_step_length, sdp_ip_pd
 
 class LP_IP(unittest.TestCase):
     def test_basic(self):
@@ -49,6 +49,12 @@ class SDP_IP_PD(unittest.TestCase):
         alpha_target = np.sqrt(0.6)
         alpha_computed = get_maximal_step_length(a, b)
         self.assertAlmostEqual(alpha_computed, alpha_target)
-
+    def test_sample_data(self):
+        C = np.array([[-1.,  1., -1., -1.],
+                      [ 1., -1., -1.,  1.],
+                      [-1., -1., -1.,  1.],
+                      [-1.,  1.,  1., -1.]])
+        sdp_ip_pd(C)
+    
 if __name__ == '__main__':
     unittest.main()
